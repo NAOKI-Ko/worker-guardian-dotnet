@@ -4,8 +4,15 @@
     <PackageId>WorkerGuardian</PackageId>
     <Version>0.1.0</Version>
     <Authors>Naoki</Authors>
+    <PackageTags>background-service;channels;concurrency;dotnet;observability;resilience;supervision</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/NAOKI-Ko/worker-guardian-dotnet</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <RepositoryUrl>https://github.com/NAOKI-Ko/worker-guardian-dotnet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
