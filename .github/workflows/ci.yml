@@ -13,8 +13,8 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.400
           cache: true
@@ -41,7 +41,7 @@ jobs:
               raise SystemExit(f"coverage gate failed: {below}")
           PY
       - run: dotnet build benchmarks/WorkerGuardian.Benchmarks -c Release --no-restore
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: dotnet-quality-reports
