@@ -1,19 +1,30 @@
-name: CI
+name: Release
 
 on:
   push:
-    branches: [main]
-  pull_request:
+    tags:
+      - "v*"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing v-prefixed tag to release
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
-  quality:
+  release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.400
@@ -41,11 +52,38 @@ jobs:
               raise SystemExit(f"coverage gate failed: {below}")
           PY
       - run: dotnet build benchmarks/WorkerGuardian.Benchmarks -c Release --no-restore
-      - run: >-
+      - name: Pack NuGet artifacts
+        run: >-
           dotnet pack src/WorkerGuardian/WorkerGuardian.csproj
           -c Release --no-build -o artifacts/packages
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: dotnet-quality-reports
-          path: artifacts/
+      - name: Verify tag matches package version
+        run: |
+          python3 - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+
+          tag = os.environ["RELEASE_TAG"]
+          if not tag.startswith("v"):
+              raise SystemExit(f"release tag must start with v: {tag}")
+          version = ET.parse("src/WorkerGuardian/WorkerGuardian.csproj").findtext(".//Version")
+          if tag[1:] != version:
+              raise SystemExit(f"tag {tag} does not match package version {version}")
+          PY
+      - name: Verify release does not already exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG already exists; refusing to overwrite it." >&2
+            exit 1
+          fi
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "$RELEASE_TAG"
+          artifacts/packages/*.nupkg
+          artifacts/packages/*.snupkg
+          --verify-tag
+          --title "$RELEASE_TAG"
+          --generate-notes
