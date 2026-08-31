@@ -48,7 +48,8 @@ errors, extension points, and trade-offs.
 
 ## Installation
 
-.NET 10 SDK is required. From a source checkout:
+The package is not currently published on NuGet.org. .NET 10 SDK is required. Build a source
+checkout with locked dependencies:
 
 ```bash
 dotnet restore WorkerGuardian.slnx --locked-mode
@@ -56,6 +57,14 @@ dotnet build WorkerGuardian.slnx -c Release --no-restore
 ```
 
 The packable library project is `src/WorkerGuardian/WorkerGuardian.csproj`.
+
+Alternatively, download `WorkerGuardian.0.1.0.nupkg` from the
+[v0.1.0 GitHub Release](https://github.com/NAOKI-Ko/worker-guardian-dotnet/releases/tag/v0.1.0),
+place it in a local `packages` directory, and install from that explicit source:
+
+```bash
+dotnet add path/to/YourProject.csproj package WorkerGuardian --version 0.1.0 --source ./packages
+```
 
 ## Quick start
 
@@ -144,7 +153,8 @@ dotnet run --project benchmarks/WorkerGuardian.Benchmarks -c Release
 ## Contributing
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Report security issues using
-the private process in [SECURITY.md](SECURITY.md).
+the private process in [SECURITY.md](SECURITY.md). Maintainers should follow the reproducible
+[release process](docs/releasing.md).
 
 ## License
 
