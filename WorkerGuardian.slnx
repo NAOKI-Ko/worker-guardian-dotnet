@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WorkerGuardian/WorkerGuardian.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WorkerGuardian.Tests/WorkerGuardian.Tests.csproj" />
+  </Folder>
+  <Folder Name="/examples/">
+    <Project Path="examples/WorkerGuardian.Examples/WorkerGuardian.Examples.csproj" />
+  </Folder>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/WorkerGuardian.Benchmarks/WorkerGuardian.Benchmarks.csproj" />
+  </Folder>
+</Solution>
+
