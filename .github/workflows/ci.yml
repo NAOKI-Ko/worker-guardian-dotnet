@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.400
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+      - run: dotnet restore WorkerGuardian.slnx --locked-mode
+      - run: dotnet build WorkerGuardian.slnx -c Release --no-restore -m:1
+      - run: dotnet format WorkerGuardian.slnx --verify-no-changes --no-restore
+      - name: Test with line and branch coverage
+        run: |
+          mkdir -p artifacts
+          dotnet run --project tests/WorkerGuardian.Tests -c Release --no-build -- \
+            --minimum-expected-tests 20 \
+            --coverage \
+            --coverage-output "$PWD/artifacts/coverage.cobertura.xml" \
+            --coverage-output-format cobertura
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+
+          root = ET.parse("artifacts/coverage.cobertura.xml").getroot()
+          rates = {name: float(root.attrib[name]) for name in ("line-rate", "branch-rate")}
+          print("coverage:", ", ".join(f"{name}={value:.2%}" for name, value in rates.items()))
+          below = {name: value for name, value in rates.items() if value < 0.90}
+          if below:
+              raise SystemExit(f"coverage gate failed: {below}")
+          PY
+      - run: dotnet build benchmarks/WorkerGuardian.Benchmarks -c Release --no-restore
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dotnet-quality-reports
+          path: artifacts/
